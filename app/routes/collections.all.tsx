@@ -93,6 +93,27 @@ const COLLECTION_ITEM_FRAGMENT = `#graphql
         ...MoneyCollectionItem
       }
     }
+    options {
+      name
+      optionValues {
+        name
+        swatch {
+          color
+          image {
+            previewImage {
+              url
+            }
+          }
+        }
+        firstSelectableVariant {
+          id
+          image {
+            url
+            altText
+          }
+        }
+      }
+    }
   }
 ` as const;
 
