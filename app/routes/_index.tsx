@@ -155,6 +155,27 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
       width
       height
     }
+    options {
+      name
+      optionValues {
+        name
+        swatch {
+          color
+          image {
+            previewImage {
+              url
+            }
+          }
+        }
+        firstSelectableVariant {
+          id
+          image {
+            url
+            altText
+          }
+        }
+      }
+    }
   }
   query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {

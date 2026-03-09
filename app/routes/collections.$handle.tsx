@@ -120,6 +120,27 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
         ...MoneyProductItem
       }
     }
+    options {
+      name
+      optionValues {
+        name
+        swatch {
+          color
+          image {
+            previewImage {
+              url
+            }
+          }
+        }
+        firstSelectableVariant {
+          id
+          image {
+            url
+            altText
+          }
+        }
+      }
+    }
   }
 ` as const;
 

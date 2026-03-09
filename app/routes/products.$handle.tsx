@@ -97,6 +97,8 @@ export default function Product() {
 
   const {title, descriptionHtml} = product;
 
+  console.log('Product - ', product);
+
   return (
     <div className="product">
       <ProductImage image={selectedVariant?.image} />
