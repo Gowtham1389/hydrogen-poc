@@ -5,6 +5,7 @@ import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {ProductItem} from '~/components/ProductItem';
 import type {ProductItemFragment} from 'storefrontapi.generated';
+import { CollectionBanner } from '~/components/CollectionBanner';
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [{title: `Hydrogen | ${data?.collection.title ?? ''} Collection`}];
@@ -35,11 +36,12 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     throw redirect('/collections');
   }
 
-  const [{collection}] = await Promise.all([
+  const [{collection}, bannerData] = await Promise.all([
     storefront.query(COLLECTION_QUERY, {
       variables: {handle, ...paginationVariables},
       // Add other queries here, so that they are loaded in parallel
     }),
+    storefront.query(COLLECTION_BANNER_QUERY, { variables: {handle}, }),
   ]);
 
   if (!collection) {
@@ -51,8 +53,23 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   // The API handle might be localized, so redirect to the localized handle
   redirectIfHandleIsLocalized(request, {handle, data: collection});
 
+  let banner = null;
+  if (bannerData?.metaobject?.fields) {
+    const fields = bannerData.metaobject.fields.reduce((acc: any, field: any) => {
+      acc[field.key] = field;
+      return acc;
+    }, {});
+
+    banner = {
+      title: fields.title?.value || '',
+      subtitle: fields.subtitle?.value || '',
+      image: fields.image?.reference?.image || null,
+    };
+  }
+
   return {
     collection,
+    banner,
   };
 }
 
@@ -66,11 +83,20 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 }
 
 export default function Collection() {
-  const {collection} = useLoaderData<typeof loader>();
-
+  const {collection, banner} = useLoaderData<typeof loader>();
   return (
     <div className="collection">
-      <h1>{collection.title}</h1>
+      {banner && (
+        <CollectionBanner
+          title={banner.title}
+          subtitle={banner.subtitle}
+          image={banner.image}
+        />
+      )}
+      {!banner?.title && (
+        <h1>{collection.title}</h1>
+      )}
+      
       <p className="collection-description">{collection.description}</p>
       <PaginatedResourceSection<ProductItemFragment>
         connection={collection.products}
@@ -177,6 +203,39 @@ const COLLECTION_QUERY = `#graphql
           startCursor
         }
       }
+    }
+  }
+` as const;
+
+export const COLLECTION_BANNER_FRAGMENT = `#graphql
+  fragment CollectionBannerFields on Metaobject {
+    id
+    handle
+    type
+    fields {
+      key
+      value
+      type
+      reference {
+        ... on MediaImage {
+          id
+          image {
+            url
+            altText
+            width
+            height
+          }
+        }
+      }
+    }
+  }
+` as const;
+
+export const COLLECTION_BANNER_QUERY = `#graphql
+  ${COLLECTION_BANNER_FRAGMENT}
+  query CollectionBanner($handle: String!) {
+    metaobject(handle: {type: "collectionbanner_poc_gowtham", handle: $handle}) {
+      ...CollectionBannerFields
     }
   }
 ` as const;
