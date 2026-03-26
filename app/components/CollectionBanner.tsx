@@ -35,10 +35,10 @@ export function CollectionBanner({
               loading="eager"
             />
           </div>
-          <div className="absolute inset-0 z-10 bg-black/50" />
+          <div className="absolute inset-0 z-1 bg-black/50" />
         </>
       )}
-      <div className="relative z-20 text-center px-4 py-8 max-w-4xl mx-auto">
+      <div className="relative z-2 text-center px-4 py-8 max-w-4xl mx-auto">
         {title && (
           <h1 className="font-bold leading-tight! mt-0! mb-4! text-white drop-shadow-lg text-4xl! md:text-5xl! lg:text-6xl!">
             {title}
